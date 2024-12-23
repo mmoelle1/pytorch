@@ -16,7 +16,6 @@ from torch._inductor.codegen.common import (
     init_backend_registration,
     get_scheduling_for_device,
 )
-from torch.utils._triton import has_triton_package
 from torch.testing._internal.common_utils import (
     LazyVal,
     IS_FBCODE,
@@ -47,25 +46,6 @@ def test_cpu():
 HAS_CPU = LazyVal(test_cpu)
 
 
-if HAS_TRITON:
-    import triton
-    TRITON_HAS_CPU = "cpu" in triton.backends.backends
-else:
-    TRITON_HAS_CPU = False
-
-
-HAS_CUDA = torch.cuda.is_available() and HAS_TRITON
-
-    try:
-        import triton.runtime
-
-        return triton.runtime.driver.active.is_active()
-    except RuntimeError:
-        return False
-
-
-HAS_TRITON = _has_triton()
-
 # Ensure the scheduling backends are registered first.
 init_backend_registration()
 
@@ -75,7 +55,7 @@ def has_inductor_available(device_type: str) -> bool:
         scheduling_factory = get_scheduling_for_device(device_type)
         if scheduling_factory is None:
             return False
-        scheduling_factory(None).check_if_available(None)
+        scheduling_factory(None).check_if_available(device_type)
         return True
     except RuntimeError:
         return False
@@ -89,6 +69,20 @@ def has_triton_backend_available(device_type: str) -> bool:
     except RuntimeError:
         return False
 
+
+def _has_triton() -> bool:
+    try:
+        import triton.runtime
+
+        return triton.runtime.driver.active.is_active()
+    except RuntimeError:
+        return False
+
+
+HAS_TRITON = _has_triton()
+
+# Triton for CPU is available.
+HAS_CPU_TRITON = HAS_TRITON and has_triton_backend_available("cpu")
 
 # We have a CUDA device and a compatible Inductor backend.
 HAS_CUDA = torch.cuda.is_available() and has_inductor_available("cuda")

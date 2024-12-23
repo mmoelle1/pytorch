@@ -99,11 +99,7 @@ def create_block_mask_test(score_mod, query, key):
     return block_mask
 
 
-TEST_ON_CUDA = (
-    torch.cuda.is_available()
-    and torch.utils._triton.has_triton()
-    and torch.cuda.get_device_capability() >= (8, 0)
-)
+TEST_ON_CUDA = HAS_CUDA_TRITON and torch.cuda.get_device_capability() >= (8, 0)
 
 if TEST_ON_CUDA:
     test_device = "cuda"
