@@ -75,7 +75,7 @@ def _has_triton() -> bool:
         import triton.runtime
 
         return triton.runtime.driver.active.is_active()
-    except RuntimeError:
+    except (RuntimeError, ImportError):
         return False
 
 
