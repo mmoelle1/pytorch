@@ -28,7 +28,7 @@ from torch.testing._internal.common_utils import (
     parametrize,
     TEST_WITH_ROCM,
 )
-from torch.utils._triton import has_triton_tma_device
+from torch.utils._triton import has_triton_tma
 
 
 aten = torch.ops.aten
@@ -214,7 +214,7 @@ class TestMaxAutotune(TestCase):
             torch.compile(mm, dynamic=dynamic)(a, b)
 
     @unittest.skipIf(
-        not has_triton_tma_device(), "Need device-side TMA support in Triton"
+        not has_triton_tma(), "Need device-side TMA support in Triton"
     )
     @parametrize("a_transposed", (False, True))
     @parametrize("b_transposed", (False, True))
@@ -257,7 +257,7 @@ class TestMaxAutotune(TestCase):
         torch.testing.assert_close(c_actual, c_expected, atol=1e-2, rtol=1e-2)
 
     @unittest.skipIf(
-        not has_triton_tma_device(), "Need device-side TMA support in Triton"
+        not has_triton_tma(), "Need device-side TMA support in Triton"
     )
     @parametrize("dynamic", (False, True))
     def test_max_autotune_regular_mm_persistent_tma_illegal_alignment(self, dynamic):
@@ -388,7 +388,7 @@ class TestMaxAutotune(TestCase):
             torch.testing.assert_close(Y_compiled, Y, atol=1e-2, rtol=1e-2)
 
     @unittest.skipIf(
-        not has_triton_tma_device(), "Need device-side TMA support in Triton"
+        not has_triton_tma(), "Need device-side TMA support in Triton"
     )
     @parametrize("a_transposed", (False, True))
     @parametrize("b_transposed", (False, True))
@@ -433,7 +433,7 @@ class TestMaxAutotune(TestCase):
         torch.testing.assert_close(c_actual, c_expected, atol=1e-2, rtol=1e-2)
 
     @unittest.skipIf(
-        not has_triton_tma_device(), "Need device-side TMA support in Triton"
+        not has_triton_tma(), "Need device-side TMA support in Triton"
     )
     @parametrize("dynamic", (False, True))
     def test_max_autotune_addmm_persistent_tma_illegal_alignment(self, dynamic):
