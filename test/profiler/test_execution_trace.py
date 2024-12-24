@@ -34,7 +34,6 @@ from torch.profiler import (
     record_function,
     supported_activities,
 )
-from torch.testing._internal.common_device_type import instantiate_device_type_tests
 from torch.testing._internal.common_cuda import TEST_CUDA
 from torch.testing._internal.common_device_type import (
     instantiate_device_type_tests,

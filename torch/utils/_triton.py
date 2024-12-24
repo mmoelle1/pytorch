@@ -9,9 +9,7 @@ def has_triton_package() -> bool:
         from triton.compiler.compiler import triton_key
 
         return triton_key is not None
-    except ImportError:
-        return False
-    except RuntimeError:
+    except (ImportError, RuntimeError):
         return False
 
 

@@ -9,12 +9,12 @@ from torch.testing._internal.common_utils import run_tests, TEST_WITH_ROCM, Test
 from torch.testing._internal.inductor_utils import (
     HAS_CUDA,
     HAS_CUDA_TRITON,
-    has_triton_package,
+    HAS_TRITON,
 )
 from torch.utils.flop_counter import FlopCounterMode, register_flop_formula
 
 
-if has_triton_package():
+if HAS_TRITON:
     # note: if we only import triton in the test, the test fails:
     # def relu_kernel_(inp_ptr, out_ptr, sz, BLOCK_SIZE: tl.constexpr):
     # NameError('tl is not defined')
