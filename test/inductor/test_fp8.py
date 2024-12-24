@@ -14,7 +14,7 @@ from torch.testing._internal.common_utils import (
     TEST_WITH_ROCM,
 )
 from torch.testing._internal.inductor_utils import HAS_CUDA
-from torch.utils._triton import has_triton_tma
+from torch.utils._triton import has_triton_tma_device
 
 
 torch.set_float32_matmul_precision("high")
@@ -415,7 +415,9 @@ class TestFP8Lowering(TestCase):
     @parametrize("shape", ("16,16,32", "1024,1024,512"))
     @parametrize("has_bias", (False, True))
     @parametrize("use_fast_accum", (False, True))
-    @parametrize("persistent_matmul", [False, True] if has_triton_tma() else [False])
+    @parametrize(
+        "persistent_matmul", [False, True] if has_triton_tma_device() else [False]
+    )
     def test_tensorwise_scaling(
         self,
         dtype: torch.dtype,
@@ -490,7 +492,9 @@ class TestFP8Lowering(TestCase):
     @parametrize("shape", ("16,16,32", "1024,1024,512"))
     @parametrize("has_bias", (False, True))
     @parametrize("use_fast_accum", (False, True))
-    @parametrize("persistent_matmul", [False, True] if has_triton_tma() else [False])
+    @parametrize(
+        "persistent_matmul", [False, True] if has_triton_tma_device() else [False]
+    )
     def test_rowwise_scaling(
         self, shape: str, has_bias: bool, use_fast_accum: bool, persistent_matmul: bool
     ):
@@ -554,7 +558,9 @@ class TestFP8Lowering(TestCase):
     @parametrize("M", (1, 3, 33, 257, 1024))
     @parametrize("K", (16, 1024))
     @parametrize("N", (16, 2048))
-    @parametrize("persistent_matmul", [False, True] if has_triton_tma() else [False])
+    @parametrize(
+        "persistent_matmul", [False, True] if has_triton_tma_device() else [False]
+    )
     def test_tensorwise_scaling_acceptable_input_dims(
         self, M: int, K: int, N: int, persistent_matmul: bool
     ):
@@ -610,7 +616,9 @@ class TestFP8Lowering(TestCase):
     @parametrize("M", (1, 3, 33, 257, 1024))
     @parametrize("K", (16, 1024))
     @parametrize("N", (16, 2048))
-    @parametrize("persistent_matmul", [False, True] if has_triton_tma() else [False])
+    @parametrize(
+        "persistent_matmul", [False, True] if has_triton_tma_device() else [False]
+    )
     def test_rowwise_scaling_acceptable_input_dims(
         self, M: int, K: int, N: int, persistent_matmul: bool
     ):
