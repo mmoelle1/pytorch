@@ -6,11 +6,7 @@ from math import prod
 import torch
 import torch._functorch.config as config
 from torch.testing._internal.common_utils import run_tests, TEST_WITH_ROCM, TestCase
-from torch.testing._internal.inductor_utils import (
-    HAS_CUDA,
-    HAS_CUDA_TRITON,
-    HAS_TRITON,
-)
+from torch.testing._internal.inductor_utils import HAS_CUDA, HAS_CUDA_TRITON, HAS_TRITON
 from torch.utils.flop_counter import FlopCounterMode, register_flop_formula
 
 
