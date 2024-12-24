@@ -39,7 +39,7 @@ from torch.testing._internal.common_device_type import (
     flex_attention_supported_platform as supported_platform,
 )
 from torch.testing._internal.common_utils import IS_MACOS, TEST_WITH_ROCM
-from torch.utils._triton import HAS_CUDA_TRITON
+from torch.testing._internal.inductor_utils import HAS_CUDA_TRITON
 
 
 # Use this decorator only when hitting Triton bugs on H100
