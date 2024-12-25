@@ -458,8 +458,6 @@ class BenchmarkRunner:
 
     def run(self):
         self._print_header()
-        DEFAULT_OUTPUT_DIR = "benchmark_logs"
-        mode = "JIT" if self.use_jit else "Eager"
         output_filename = self.args.output_dir
         headers = [
             "Benchmarking Framework",
@@ -469,9 +467,6 @@ class BenchmarkRunner:
             "run_backward",
             "Execution Time",
         ]
-
-        if self.args.disable_output:
-            disable_output = True
 
         if self.args.output_json:
             perf_list = []
@@ -523,9 +518,11 @@ class BenchmarkRunner:
                     [
                         test_case.framework,
                         test_case.op_bench.module_name(),
-                        test_case.test_config.test_name + "_BACKWARD"
-                        if test_case.test_config.run_backward is True
-                        else test_case.test_config.test_name,
+                        (
+                            test_case.test_config.test_name + "_BACKWARD"
+                            if test_case.test_config.run_backward is True
+                            else test_case.test_config.test_name
+                        ),
                         test_case.test_config.tag,
                         test_case.test_config.run_backward,
                         reported_time[0],
