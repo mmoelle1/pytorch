@@ -3703,7 +3703,11 @@ def repeat(a: Tensor, *repeat_shape) -> Tensor:
 
 
 def _reshape_view_helper(a: TensorLikeType, *shape, allow_copy: bool) -> TensorLikeType:
-    from torch.fx.experimental.symbolic_shapes import guard_size_oblivious, sym_eq
+    from torch.fx.experimental.symbolic_shapes import (
+        guard_size_oblivious,
+        statically_known_true,
+        sym_eq,
+    )
 
     # Creates a valid shape
     shape = utils.extract_shape_from_varargs(shape, validate=False)
@@ -3780,7 +3784,7 @@ def _reshape_view_helper(a: TensorLikeType, *shape, allow_copy: bool) -> TensorL
             continue
 
         # Skips dimensions that are already the correct length
-        if guard_size_oblivious(length == a_.shape[idx]):
+        if statically_known_true(length == a_.shape[idx]):
             idx = idx + 1
             continue
 
