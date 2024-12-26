@@ -391,10 +391,8 @@ class CppGroupGemmTemplate(CppGemmTemplate):
         L2_cache_size = torch._C._cpu._L2_cache_size()  # per core cache size in Bytes
         assert L2_cache_size > 0, f"Expect L2_cache_size > 0 but got {L2_cache_size}"
 
-        epilogues: List[List[ir.IRNode]] = [[] for _ in range(self.gemm_group_num)]
-        reindexers: List[List[Optional[Callable[[List[Any]], List[Any]]]]] = [
-            [] for _ in range(self.gemm_group_num)
-        ]
+        epilogues: List[ir.IRNode] = []
+        reindexers: List[Optional[Callable[[List[Any]], List[Any]]]] = []
 
         gemm_output_buffers: list[ir.Buffer] = []
         for out_buf_idx in range(self.gemm_group_num):
@@ -406,7 +404,7 @@ class CppGroupGemmTemplate(CppGemmTemplate):
             )
 
         assert (
-            not self.epilogue_creator and not epilogue_nodes
+            not self.epilogue_creator
         ), "Epilogue fusion is not implemented yet in Group GEMM Template"
 
         kernel_args = {}
@@ -425,14 +423,21 @@ class CppGroupGemmTemplate(CppGemmTemplate):
         for gemm_idx, inp in enumerate(inp_list):
             if inp:
                 buffer_name = Y_list[gemm_idx].get_name()
-                epilogues[gemm_idx].append(
+                epilogues.append(
                     ir.ComputedBuffer(
                         name=buffer_name,
                         layout=template_buffer.layout,
                         data=_bias_add_epilogue(gemm_output_buffers[gemm_idx], inp),
                     )
                 )
-                reindexers[gemm_idx].append(None)
+                reindexers.append(None)
+
+        # <TODO> leslie: Add the fusion check in the Scheduler for Now
+        # <TODO> support the case when dimension and the indexing could be different between the GEMM output
+        # and epilogues, considering that output buf number might be different from GEMM number.
+        if epilogue_nodes:
+            epilogues.extend(epilogue_nodes)
+            reindexers.extend([None] * len(epilogue_nodes))
 
         options = dict(
             N=self.n,
