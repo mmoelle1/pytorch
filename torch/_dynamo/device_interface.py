@@ -1,4 +1,5 @@
 # mypy: allow-untyped-defs
+import inspect
 import time
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Type, Union
@@ -249,14 +250,11 @@ class CudaInterface(DeviceInterface):
 
     @staticmethod
     def check_if_triton_available(device: _device_t = None) -> None:
+        from torch._inductor.exc import GPUTooOldForTriton
+
         if not CudaInterface.is_triton_capable(device):
             device_props = torch.cuda.get_device_properties(device)
-            raise RuntimeError(
-                f"Found {device_props.name} which is too old to be supported by the triton GPU "
-                "compiler, which is used as the backend. Triton only supports devices of CUDA "
-                "Capability >= 7.0, but your device is of CUDA capability "
-                f"{device_props.major}.{device_props.minor}"
-            )
+            raise GPUTooOldForTriton(device_props, inspect.currentframe())
 
         import triton.backends
 

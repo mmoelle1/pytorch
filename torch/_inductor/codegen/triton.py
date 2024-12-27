@@ -5,6 +5,7 @@ import collections
 import contextlib
 import dataclasses
 import functools
+import inspect
 import itertools
 import logging
 import os
@@ -70,6 +71,7 @@ from ..utils import (
 )
 from ..virtualized import _ops as ops, OpsHandler, ReductionType, StoreMode, V
 from ..wrapper_benchmark import get_kernel_category_by_source_code
+from ..exc import TritonMissing
 from .block_analysis import BlockPatternMatcher
 from .common import (
     BackendFeature,
@@ -3682,10 +3684,7 @@ class TritonScheduling(SIMDScheduling):
     @classmethod
     def check_if_available(cls, device: Union[str, torch.device, None] = None) -> None:
         if not has_triton_package():
-            raise RuntimeError(
-                "Cannot find a working Triton installation. More information on installing Triton "
-                "can be found at https://github.com/triton-lang/triton"
-            )
+            raise TritonMissing(inspect.currentframe())
 
         from torch._dynamo.device_interface import get_interface_for_device
 
