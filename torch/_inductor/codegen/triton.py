@@ -41,6 +41,7 @@ from ...utils._sympy.symbol import free_symbol_is_type, prefix_str, symbol_is_ty
 from ...utils._sympy.value_ranges import ValueRanges
 from .. import config, ir, metrics
 from ..codecache import code_hash, get_path, PyCodeCache
+from ..exc import TritonMissing
 from ..runtime.benchmarking import benchmarker
 from ..runtime.hints import (
     AutotuneHint,
@@ -71,7 +72,6 @@ from ..utils import (
 )
 from ..virtualized import _ops as ops, OpsHandler, ReductionType, StoreMode, V
 from ..wrapper_benchmark import get_kernel_category_by_source_code
-from ..exc import TritonMissing
 from .block_analysis import BlockPatternMatcher
 from .common import (
     BackendFeature,

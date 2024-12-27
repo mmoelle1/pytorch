@@ -1,6 +1,5 @@
 # Owner(s): ["oncall: pt2"]
 
-import functools
 import tempfile
 import unittest
 

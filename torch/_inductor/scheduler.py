@@ -4,7 +4,6 @@ from __future__ import annotations
 import collections
 import dataclasses
 import functools
-import inspect
 import itertools
 import logging
 import math
