@@ -19,13 +19,11 @@ from ..remote_cache import (
     RemoteCacheBackend,
     RemoteCacheJsonSerde,
 )
+from .triton_compat import Config
 
 
 if TYPE_CHECKING:
     from ..remote_cache import Sample
-
-if has_triton_package():
-    from triton import Config
 
 log = logging.getLogger(__name__)
 
