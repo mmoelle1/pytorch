@@ -1,5 +1,6 @@
 # Owner(s): ["oncall: pt2"]
 
+import functools
 import tempfile
 import unittest
 
@@ -22,10 +23,11 @@ from torch.utils._content_store import (
 
 
 @unittest.skipIf(IS_WINDOWS, "Test case not supported on Windows")
-@unittest.skipIf(
-    not torch._dynamo.is_inductor_supported(), "ContentStore requires Inductor"
-)
 class TestContentStore(TestCase):
+    def setUpClass(self):
+        if not torch._dynamo.is_inductor_supported(self.device_type):
+            raise unittest.SkipTest("Requires Inductor support")
+
     def test_basic(self, device):
         # setup test data
         x = torch.randn(4, device=device)
