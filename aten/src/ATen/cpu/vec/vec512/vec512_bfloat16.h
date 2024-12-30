@@ -676,14 +676,14 @@ public:
       return _mm512_castsi512_ps(_mm512_mask_set1_epi32(zero_vec, cmp, 0xFFFFFFFF));
     });
   }
-  Vectorized<T> inline operator==(const Vectorized<T>& other) const {
+  Vectorized<T> inline operator==(const Vectorized16<T>& other) const {
     return binary_compare(other, [](__m512 x, __m512 y) {
       auto zero_vec = _mm512_set1_epi32(0);
       auto cmp = _mm512_cmp_ps_mask(x, y, _CMP_EQ_OQ);
       return _mm512_castsi512_ps(_mm512_mask_set1_epi32(zero_vec, cmp, 0xFFFFFFFF));
     });
   }
-  Vectorized<T> inline operator!=(const Vectorized<T>& other) const {
+  Vectorized<T> inline operator!=(const Vectorized16<T>& other) const {
     return binary_compare(other, [](__m512 x, __m512 y) {
       auto zero_vec = _mm512_set1_epi32(0);
       auto cmp = _mm512_cmp_ps_mask(x, y, _CMP_NEQ_UQ);
