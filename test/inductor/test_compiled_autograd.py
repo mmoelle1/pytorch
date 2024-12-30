@@ -1,4 +1,5 @@
 # Owner(s): ["module: inductor"]
+# ruff: noqa: F841
 import contextlib
 import dataclasses
 import functools
@@ -24,6 +25,7 @@ from torch._dynamo.device_interface import get_interface_for_device
 from torch._dynamo.utils import counters
 from torch._inductor import config as inductor_config
 from torch._inductor.test_case import run_tests, TestCase
+from torch.nn.attention.flex_attention import flex_attention
 from torch.testing._internal.common_utils import (
     scoped_load_inline,
     skipIfWindows,
@@ -799,7 +801,6 @@ main()
 
             return torch.compile(gm, backend=inner_compiler)
 
-        fwd_compiler_fn = functools.partial(eager_with_check, is_bwd=False)
         bwd_compiler_fn = functools.partial(eager_with_check, is_bwd=True)
 
         def fn(inputs):
@@ -940,7 +941,7 @@ main()
         torch._dynamo.reset()
         handle = torch._dynamo.convert_frame.register_bytecode_hook(bytecode_hook)
         try:
-            out = compiled_fn(inputs)
+            compiled_fn(inputs)
             self.assertTrue(len(inputs) == 0)
         finally:
             handle.remove()
@@ -2424,7 +2425,9 @@ TORCH_LIBRARY(test_autograd_cpp_node_saved_float, m) {
                 yield x.grad
 
         # compiled autograd and dynamo both support symfloat, but not backend
-        self.check_output_and_recompiles(fn, [1, 3])
+        self.check_output_and_recompiles(fn, [1, 4])
+        # 1 restart analysis due to specialize_float=False
+        self.assertEqual(counters["stats"]["unique_graphs"], 3)
 
     @scoped_load_inline
     def test_autograd_cpp_node_data_dependent(self, load_inline):
@@ -3215,6 +3218,31 @@ TORCH_LIBRARY(test_cudagraphs_cpu_scalar_used_in_cpp_custom_op, m) {
         # First 2 view nodes have a first argument that is a SymInt, not an int burned into the graph
         self.assertTrue(isinstance(view_nodes[0].args[1][0], torch.fx.Node))
         self.assertTrue(isinstance(view_nodes[1].args[1][0], torch.fx.Node))
+
+    @unittest.skipIf(not HAS_CUDA, "requires cuda")
+    def test_flex_attention(self):
+        def fn():
+            @torch.compile(backend="aot_eager")
+            def fwd_bwd(x: torch.Tensor):
+                flex_attention(x, x, x).sum().backward()
+
+            for a, b in zip([12, 24, 48], [64, 128, 256]):
+                v = torch.zeros(
+                    1,
+                    1,
+                    a * b,
+                    b,
+                    dtype=torch.bfloat16,
+                    device="cuda",
+                    requires_grad=True,
+                )
+                fwd_bwd(v)
+                yield v.grad
+
+        # TODO: Dynamo graph breaks on torch.ops.higher_order.flex_attention_backward
+        self.check_output_and_recompiles(
+            fn, count=3, compiler_fn=make_compiler_fn(fullgraph=False)
+        )
 
     @unittest.expectedFailure
     def test_saved_tensor_unpack_hook_ordering(self):
